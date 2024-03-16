@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:13.14
+    container_name: assign_db
+    restart: always
+    environment:
+      POSTGRES_USER: rsupport
+      POSTGRES_PASSWORD: rsupport1&&
+      POSTGRES_DB: rsupport_db
+    ports:
+      - "25432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+

@@ -1,18 +1,58 @@
 package com.rsupport.assign.noti.web;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rsupport.assign.common.ApiResponse;
+import com.rsupport.assign.noti.dto.NotiDto;
+import com.rsupport.assign.noti.entity.Noti;
+import com.rsupport.assign.noti.service.NotiService;
+
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/noti")
 public class NotiController {
 
+  @Autowired
+  private NotiService service;
+
   @GetMapping("/test")
   public Mono<String> test() {
-    return Mono.just("hello, world");
+    return Mono.just("hello, world.");
+  }
+
+  @GetMapping("/list")
+  public Flux<Noti> list() {
+    return service.findList();
+  }
+
+  @GetMapping("/{id}")
+  public Mono<Noti> single(@PathVariable("id") String id) {
+    return service.findOne(id);
+  }
+
+  @PostMapping("/create")
+  public Mono<ApiResponse> create(@RequestBody NotiDto input) {
+    return service.insert(input);
+  }
+
+  @PutMapping("/{id}")
+  public Mono<ApiResponse> update(@PathVariable("id") String id, @RequestBody NotiDto input) {
+    return service.update(id, input);
+  }
+
+  @DeleteMapping("/{id}")
+  public Mono<ApiResponse> delete(@PathVariable("id") String id) {
+    return service.delete(id);
   }
 
 }
