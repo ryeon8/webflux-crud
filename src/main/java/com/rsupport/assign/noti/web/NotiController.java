@@ -55,17 +55,21 @@ public class NotiController {
     return service.findOne(id)
         .flatMap(saved -> {
           boolean validUser = StringUtils.equals(saved.getUserEmail(), auth.getName());
-          if (validUser) {
-            return service.update(id, input);
-          } else {
-            return Mono.just(ApiResponse.builder().success(false).message("수정 권한 없음").build());
-          }
+          return validUser
+              ? service.update(id, input)
+              : Mono.just(ApiResponse.builder().success(false).message("수정 권한 없음").build());
         });
   }
 
   @DeleteMapping("/{id}")
   public Mono<ApiResponse> delete(Authentication auth, @PathVariable("id") String id) {
-    return service.delete(id);
+    return service.findOne(id)
+        .flatMap(saved -> {
+          boolean validUser = StringUtils.equals(saved.getUserEmail(), auth.getName());
+          return validUser
+              ? service.delete(id)
+              : Mono.just(ApiResponse.builder().success(false).message("삭제 권한 없음").build());
+        });
   }
 
 }
