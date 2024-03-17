@@ -1,8 +1,50 @@
 @server=http://localhost:8080
 @token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyeWVvbkB0ZXN0LmNvbSIsImlzcyI6InJzdXBwb3J0LWFzc2lnbi1ub3RpLXNlcnZlciIsImlhdCI6MTcxMDY0MDg0MSwiZXhwIjoxNzEwNzI3MjQxLCJlbWFpbCI6InJ5ZW9uQHRlc3QuY29tIiwiYWRtaW4iOiJhZG1pbiJ9.ZLA9ql2K20IMeks-IwJ4EUo1hBZYopCH1in9w2-dMTE
 
-### token 발행
+### token 발행 
 GET {{server}}/api/token?email=ryeon@test.com
+
+### 첨부파일 조회
+GET {{server}}/file/download/76955aa9-45e0-46db-bcb9-7dbde15e231d
+
+### 첨부파일 업로드
+POST {{server}}/file/upload
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=BOUNDARY
+
+--BOUNDARY
+Content-Disposition: form-data; name="files"; filename="uploadSample.txt"
+Content-Type: text/plain
+
+{ "name": "jane" }
+
+--BOUNDARY
+Content-Disposition: form-data; name="files"; filename="uploadSample2.txt"
+Content-Type: text/plain
+
+{ "name": "jane doe" }
+
+--BOUNDARY--
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### test
 GET {{server}}/noti/test

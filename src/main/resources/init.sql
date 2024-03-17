@@ -23,10 +23,12 @@ create table if not exists noti_deleted (
 	delete_date_time timestamp not null default now()
 );
 
-create table if not exists noti_file (
-	noti_id int4 NOT NULL,
-	file_url varchar(255) NOT NULL,
-	CONSTRAINT fk_noti_file1 FOREIGN KEY (noti_id) REFERENCES noti(id)
+create table if not exists file_info (
+	id serial primary key,
+	file_id varchar(36) not null,
+	user_email varchar(255) not null,
+	origin_name varchar(255) not null,
+	create_date_time timestamp not null default now()
 );
 
 insert into users (email) values ('ryeon@test.com');

@@ -9,6 +9,7 @@ public class ApiResponse {
 
   private boolean success;
   private String message;
-  private Integer id;
+  private Object id;
+  private Object optional;
 
 }

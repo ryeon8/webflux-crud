@@ -50,7 +50,7 @@ public class SecurityConfig {
   @Autowired
   private JwtProvider jwtProvider;
 
-  private static String[] CAN_ACCESS_ANYBODY = { "/api/token" };
+  private static String[] CAN_ACCESS_ANYBODY = { "/api/token", "/file/download/**" };
 
   @Bean
   SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
@@ -99,7 +99,7 @@ public class SecurityConfig {
         .map(SimpleGrantedAuthority::new)
         .toList();
 
-    User user = new User(ClaimKey.EMAIL.getKey(), "dummy-password-123", authorities);
+    User user = new User(claims.get(ClaimKey.EMAIL.getKey()).toString(), "dummy-password-123", authorities);
 
     return new UsernamePasswordAuthenticationToken(user, "", authorities);
   }
