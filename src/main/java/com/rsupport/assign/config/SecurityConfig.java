@@ -3,8 +3,10 @@ package com.rsupport.assign.config;
 // import static org.springframework.security.config.Customizer.withDefaults;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.util.Arrays;
+import java.util.Collection;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +15,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
@@ -27,8 +34,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rsupport.assign.common.JwtProvider;
+import com.rsupport.assign.common.JwtProvider.ClaimKey;
 import com.rsupport.assign.common.SecurityResponseContent;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -71,14 +81,27 @@ public class SecurityConfig {
     return exchange -> {
       String token = jwtProvider.resolveToken(exchange.getRequest());
       try {
-        if (!Objects.isNull(token) && jwtProvider.validateToken(token)) {
-          return Mono.justOrEmpty(jwtProvider.getAuthentication(token));
+        if (StringUtils.isNotBlank(token)) {
+          Claims claims = jwtProvider.parseClaims(token);
+          return Mono.just(getAuthentication(claims));
         }
-      } catch (AuthenticationException e) {
+      } catch (AuthenticationException | JwtException e) {
         log.error(e.getMessage(), e);
       }
+
       return Mono.empty();
     };
+  }
+
+  private Authentication getAuthentication(Claims claims) throws AuthenticationException {
+    Collection<? extends GrantedAuthority> authorities = Arrays
+        .stream(claims.get(ClaimKey.ROLE.getKey()).toString().split(","))
+        .map(SimpleGrantedAuthority::new)
+        .toList();
+
+    User user = new User(ClaimKey.EMAIL.getKey(), "dummy-password-123", authorities);
+
+    return new UsernamePasswordAuthenticationToken(user, "", authorities);
   }
 
   private ServerAuthenticationEntryPoint serverAuthenticationEntryPoint() {
