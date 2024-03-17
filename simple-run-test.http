@@ -1,0 +1,45 @@
+@server=http://localhost:8080
+@token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyeWVvbkB0ZXN0LmNvbSIsImlzcyI6InJzdXBwb3J0LWFzc2lnbi1ub3RpLXNlcnZlciIsImlhdCI6MTcxMDY0MDg0MSwiZXhwIjoxNzEwNzI3MjQxLCJlbWFpbCI6InJ5ZW9uQHRlc3QuY29tIiwiYWRtaW4iOiJhZG1pbiJ9.ZLA9ql2K20IMeks-IwJ4EUo1hBZYopCH1in9w2-dMTE
+
+### token 발행
+GET {{server}}/api/token?email=ryeon@test.com
+
+### test
+GET {{server}}/noti/test
+Authorization: Bearer {{token}}
+
+### 목록 조회 
+GET {{server}}/noti/list
+Authorization: Bearer {{token}}
+ 
+### 등록
+POST {{server}}/noti/create
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "input test",
+  "description": "input test content",
+  "openDateTime": "2023-01-01T00:00:00",
+  "fileUrlList": ["url1", "url2"]
+}
+ 
+### 단건 조회
+GET {{server}}/noti/2
+Authorization: Bearer {{token}}
+
+### 수정
+PUT {{server}}/noti/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "input test updated",
+  "description": "input test content",
+  "openDateTime": "",
+  "fileUrlList": ["url1", "url2"]
+}
+
+### 삭제
+DELETE {{server}}/noti/1
+Authorization: Bearer {{token}}
