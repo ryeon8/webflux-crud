@@ -1,10 +1,11 @@
 package com.rsupport.assign.noti.entity;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.InsertOnlyProperty;
 import org.springframework.data.relational.core.mapping.Table;
 
 import lombok.AllArgsConstructor;
@@ -20,19 +21,21 @@ import lombok.NoArgsConstructor;
 public class Noti {
 
   @Id
-  private Integer id;
-
+  private Long id;
   @Column
   private String title;
-
   @Column
-  private String description;
-
+  private String content;
   @Column
   private LocalDateTime openDateTime;
-
   @Column
   private LocalDateTime closeDateTime;
+  @Column
+  @InsertOnlyProperty
+  private String userEmail;
+  @Column
+  @ReadOnlyProperty
+  private LocalDateTime createDateTime;
 
   // private List<NotiFile> fileList; // TODO 이것도 flux여야 할까?
 

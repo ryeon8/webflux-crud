@@ -1,8 +1,11 @@
 package com.rsupport.assign.noti.web;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -35,23 +38,33 @@ public class NotiController {
     return service.findList();
   }
 
-  @GetMapping("/{id}")
+  @GetMapping("/detail/{id}")
   public Mono<Noti> single(@PathVariable("id") String id) {
     return service.findOne(id);
   }
 
   @PostMapping("/create")
-  public Mono<ApiResponse> create(@RequestBody NotiDto input) {
+  public Mono<ApiResponse> create(Authentication auth, @ModelAttribute NotiDto input) {
+    input.setUserEmail(auth.getName());
+
     return service.insert(input);
   }
 
   @PutMapping("/{id}")
-  public Mono<ApiResponse> update(@PathVariable("id") String id, @RequestBody NotiDto input) {
-    return service.update(id, input);
+  public Mono<ApiResponse> update(Authentication auth, @PathVariable("id") String id, @ModelAttribute NotiDto input) {
+    return service.findOne(id)
+        .flatMap(saved -> {
+          boolean validUser = StringUtils.equals(saved.getUserEmail(), auth.getName());
+          if (validUser) {
+            return service.update(id, input);
+          } else {
+            return Mono.just(ApiResponse.builder().success(false).message("수정 권한 없음").build());
+          }
+        });
   }
 
   @DeleteMapping("/{id}")
-  public Mono<ApiResponse> delete(@PathVariable("id") String id) {
+  public Mono<ApiResponse> delete(Authentication auth, @PathVariable("id") String id) {
     return service.delete(id);
   }
 

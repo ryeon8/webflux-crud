@@ -41,13 +41,10 @@ public class NotiServiceImpl implements NotiService {
 
   @Override
   public Mono<ApiResponse> update(String id, NotiDto input) {
-    return findOne(id)
-        .flatMap(exist -> {
-          return repo.save(exist);
-        })
-        .map(updated -> {
-          return ApiResponse.builder().success(true).build();
-        });
+    Noti yetSaved = input.toEntity(Long.parseLong(id));
+
+    return repo.save(yetSaved)
+        .map(saved -> ApiResponse.builder().success(true).build());
   }
 
   @Override
@@ -57,6 +54,12 @@ public class NotiServiceImpl implements NotiService {
           return repo.delete(exist);
         })
         .then(Mono.just(ApiResponse.builder().success(true).build()));
+  }
+
+  @Override
+  public Mono<Boolean> checkWriter(String userEmail, String id) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'checkWriter'");
   }
 
 }

@@ -19,4 +19,6 @@ public interface NotiService {
 
   Mono<ApiResponse> delete(String id);
 
+  Mono<Boolean> checkWriter(String name, String id);
+
 }

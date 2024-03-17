@@ -8,6 +8,7 @@ import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import io.r2dbc.spi.ConnectionFactory;
 
@@ -24,6 +25,11 @@ public class DemoApplication {
 		initializer.setDatabasePopulator(new ResourceDatabasePopulator(new ClassPathResource("init.sql")));
 
 		return initializer;
+	}
+
+	@Bean
+	WebClient webClient() {
+		return WebClient.create();
 	}
 
 	public static void main(String[] args) {

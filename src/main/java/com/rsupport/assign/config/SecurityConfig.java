@@ -50,7 +50,7 @@ public class SecurityConfig {
   @Autowired
   private JwtProvider jwtProvider;
 
-  private static String[] CAN_ACCESS_ANYBODY = { "/api/token", "/file/download/**" };
+  private static String[] CAN_ACCESS_ANYBODY = { "/api/token", "/noti/list", "/noti/detail/**", "/file/download/**" };
 
   @Bean
   SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {

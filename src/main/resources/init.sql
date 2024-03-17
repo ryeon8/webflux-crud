@@ -6,9 +6,10 @@ create table if not exists users (
 create table if not exists noti (
 	id serial primary key, 
 	title VARCHAR(255) not null,
-	description text not null,
+	content text not null,
 	open_date_time timestamp,
 	close_date_time timestamp,
+	user_email varchar(255) not null,
 	create_date_time timestamp not null default now(),
 	update_date_time timestamp
 );
