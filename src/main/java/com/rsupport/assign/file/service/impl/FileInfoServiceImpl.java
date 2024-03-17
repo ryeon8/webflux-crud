@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -55,7 +56,30 @@ public class FileInfoServiceImpl implements FileInfoService {
   }
 
   @Override
-  public Mono<ApiResponse> upload(String email, Flux<FilePart> filePartFlux) {
+  public Mono<ApiResponse> uploadSingle(String email, Mono<FilePart> filePartMono) {
+    return filePartMono
+        .flatMap(filePart -> {
+          String newFileId = UUID.randomUUID().toString();
+
+          filePart.transferTo(Paths.get(fileUploadDir, newFileId));
+
+          FileInfo yetSaved = FileInfo.builder()
+              .fileId(newFileId)
+              .userEmail(email)
+              .originName(filePart.filename())
+              .build();
+          repo.save(yetSaved);
+
+          ApiResponse response = ApiResponse.builder()
+              .success(true)
+              .optional(Pair.of(newFileId, filePart.filename()))
+              .build();
+          return Mono.just(response);
+        });
+  }
+
+  @Override
+  public Mono<ApiResponse> uploadMultiple(String email, Flux<FilePart> filePartFlux) {
     Map<String, String> saveResult = new HashMap<>();
 
     return filePartFlux
@@ -73,7 +97,7 @@ public class FileInfoServiceImpl implements FileInfoService {
           Mono<FileInfo> persist = repo.save(yetSaved);
 
           return Mono.when(saveFile, persist);
-        }).then(Mono.just(ApiResponse.builder().optional(saveResult).build()));
+        }).then(Mono.just(ApiResponse.builder().success(true).optional(saveResult).build()));
   }
 
 }

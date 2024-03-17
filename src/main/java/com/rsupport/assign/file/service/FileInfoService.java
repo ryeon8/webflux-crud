@@ -12,6 +12,8 @@ public interface FileInfoService {
 
   Mono<Resource> readSavedFile(String fileId);
 
-  Mono<ApiResponse> upload(String username, Flux<FilePart> filePartFlux);
+  Mono<ApiResponse> uploadSingle(String name, Mono<FilePart> filePartMono);
+
+  Mono<ApiResponse> uploadMultiple(String username, Flux<FilePart> filePartFlux);
 
 }

@@ -34,9 +34,14 @@ public class FileInfoController {
         .body(saved);
   }
 
-  @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public Mono<ApiResponse> upload(Authentication auth, @RequestPart("files") Flux<FilePart> filePartFlux) {
-    return service.upload(auth.getName(), filePartFlux);
+  @PostMapping(value = "/upload/single", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public Mono<ApiResponse> uploadSingle(Authentication auth, @RequestPart("file") Mono<FilePart> filePartMono) {
+    return service.uploadSingle(auth.getName(), filePartMono);
+  }
+
+  @PostMapping(value = "/upload/multiple", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public Mono<ApiResponse> uploadMultiple(Authentication auth, @RequestPart("files") Flux<FilePart> filePartFlux) {
+    return service.uploadMultiple(auth.getName(), filePartFlux);
   }
 
 }
