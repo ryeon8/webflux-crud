@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import static org.mockito.ArgumentMatchers.any;
 
 import com.rsupport.assign.noti.entity.Noti;
 import com.rsupport.assign.noti.service.NotiService;
@@ -29,7 +30,7 @@ public class NotiControllerTest {
   public void should_success_공지글_목록_조회() {
     // given
     Noti noti1 = Noti.builder().id(1L).title("mock").content("content").build();
-    Mockito.when(notiService.findList()).thenReturn(Flux.just(noti1));
+    Mockito.when(notiService.findList(any())).thenReturn(Flux.just(noti1));
 
     // when
     webTestClient.get().uri("/noti/list")

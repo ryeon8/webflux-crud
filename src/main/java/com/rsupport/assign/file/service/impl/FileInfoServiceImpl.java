@@ -4,11 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -16,7 +13,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 
-import com.rsupport.assign.common.ApiResponse;
 import com.rsupport.assign.file.entity.FileInfo;
 import com.rsupport.assign.file.repository.FileInfoRepository;
 import com.rsupport.assign.file.service.FileInfoService;
@@ -56,7 +52,7 @@ public class FileInfoServiceImpl implements FileInfoService {
   }
 
   @Override
-  public Mono<ApiResponse> uploadSingle(String email, Mono<FilePart> filePartMono) {
+  public Mono<String> uploadSingle(String email, Mono<FilePart> filePartMono) {
     return filePartMono
         .flatMap(filePart -> {
           String newFileId = UUID.randomUUID().toString();
@@ -70,34 +66,30 @@ public class FileInfoServiceImpl implements FileInfoService {
               .build();
           repo.save(yetSaved);
 
-          ApiResponse response = ApiResponse.builder()
-              .success(true)
-              .optional(Pair.of(newFileId, filePart.filename()))
-              .build();
-          return Mono.just(response);
+          return Mono.just(newFileId);
         });
   }
 
-  @Override
-  public Mono<ApiResponse> uploadMultiple(String email, Flux<FilePart> filePartFlux) {
-    Map<String, String> saveResult = new HashMap<>();
+  private Mono<Void> serializeFile(FilePart filePart, String filename) {
+    return filePart.transferTo(Paths.get(fileUploadDir, filename));
+  }
 
+  private Mono<FileInfo> persistFile(FileInfo yetSaved) {
+    return repo.save(yetSaved);
+  }
+
+  @Override
+  public Flux<FileInfo> uploadMultiple(String email, Flux<FilePart> filePartFlux) {
     return filePartFlux
         .flatMap(filePart -> {
-          String newFileId = UUID.randomUUID().toString();
-          saveResult.put(filePart.filename(), newFileId);
-
-          Mono<Void> saveFile = filePart.transferTo(Paths.get(fileUploadDir, newFileId));
-
-          FileInfo yetSaved = FileInfo.builder()
-              .fileId(newFileId)
-              .userEmail(email)
-              .originName(filePart.filename())
+          String fileId = UUID.randomUUID().toString();
+          FileInfo fileInfo = FileInfo.builder()
+              .fileId(fileId).userEmail(email).originName(filePart.filename())
               .build();
-          Mono<FileInfo> persist = repo.save(yetSaved);
-
-          return Mono.when(saveFile, persist);
-        }).then(Mono.just(ApiResponse.builder().success(true).optional(saveResult).build()));
+          return serializeFile(filePart, fileId)
+              .and(persistFile(fileInfo))
+              .thenReturn(fileInfo);
+        });
   }
 
 }

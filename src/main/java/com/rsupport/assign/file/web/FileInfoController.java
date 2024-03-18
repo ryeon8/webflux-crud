@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rsupport.assign.common.ApiResponse;
+import com.rsupport.assign.file.entity.FileInfo;
 import com.rsupport.assign.file.service.FileInfoService;
 
 import reactor.core.publisher.Flux;
@@ -35,12 +35,20 @@ public class FileInfoController {
   }
 
   @PostMapping(value = "/upload/single", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public Mono<ApiResponse> uploadSingle(Authentication auth, @RequestPart("file") Mono<FilePart> filePartMono) {
+  public Mono<String> uploadSingle(Authentication auth, @RequestPart("file") Mono<FilePart> filePartMono) {
     return service.uploadSingle(auth.getName(), filePartMono);
   }
 
+  // @PostMapping(value = "/upload/multiple", consumes =
+  // MediaType.MULTIPART_FORM_DATA_VALUE)
+  // public Mono<ApiResponse> uploadMultiple(Authentication auth,
+  // @RequestPart("files") Flux<FilePart> filePartFlux) {
+  // return service.uploadMultiple(auth.getName(), filePartFlux);
+  // }
+
   @PostMapping(value = "/upload/multiple", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public Mono<ApiResponse> uploadMultiple(Authentication auth, @RequestPart("files") Flux<FilePart> filePartFlux) {
+  public Flux<FileInfo> uploadMultiple2(Authentication auth,
+      @RequestPart("files") Flux<FilePart> filePartFlux) {
     return service.uploadMultiple(auth.getName(), filePartFlux);
   }
 

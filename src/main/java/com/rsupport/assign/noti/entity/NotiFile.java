@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class NotiFile {
 
-  private Integer notiId;
-  private String fileUrl;
+  private Long notiId;
+  private String fileId;
 
 }

@@ -50,7 +50,9 @@ public class SecurityConfig {
   @Autowired
   private JwtProvider jwtProvider;
 
-  private static String[] CAN_ACCESS_ANYBODY = { "/api/token", "/noti/list", "/noti/detail/**", "/file/download/**" };
+  private static String[] CAN_ACCESS_ANYBODY = {
+      "/api/token", "/noti/list", "/noti/detail/**", "/file/download/**"
+  };
 
   @Bean
   SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
@@ -94,14 +96,20 @@ public class SecurityConfig {
   }
 
   private Authentication getAuthentication(Claims claims) throws AuthenticationException {
+    // 별도 인증 서버가 있고, 그 서버에서 관리자 계정을 관리한다고 가정하므로 여기서는 jwtToken에서 email만 복호화해 .
+    // 실제로는 webClient를 이용해 통신 후 jwtToken 유효성 검증 단계가 필요함.
+    // 그러나 현재 로컬 환경에서
+    // io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider 문제가 해결되지 않아
+    // 시간 관계상 임의 설정을 유지하기로 함.
     Collection<? extends GrantedAuthority> authorities = Arrays
         .stream(claims.get(ClaimKey.ROLE.getKey()).toString().split(","))
         .map(SimpleGrantedAuthority::new)
         .toList();
 
-    User user = new User(claims.get(ClaimKey.EMAIL.getKey()).toString(), "dummy-password-123", authorities);
+    String dummyPassword = "dummy-password-123";
+    User user = new User(claims.get(ClaimKey.EMAIL.getKey()).toString(), dummyPassword, authorities);
 
-    return new UsernamePasswordAuthenticationToken(user, "", authorities);
+    return new UsernamePasswordAuthenticationToken(user, dummyPassword, authorities);
   }
 
   private ServerAuthenticationEntryPoint serverAuthenticationEntryPoint() {
