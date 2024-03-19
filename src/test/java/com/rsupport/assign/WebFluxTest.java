@@ -1,7 +1,9 @@
 package com.rsupport.assign;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
@@ -64,5 +66,16 @@ public class WebFluxTest {
     System.out.println("before subscribing");
 
     stringFlux.subscribe(System.out::println);
+  }
+
+  @Test
+  public void test4() {
+    List<Boolean> list = IntStream.range(0, 3).mapToObj(i -> {
+      // return ((i + 1) % 2) == 0;
+      return false;
+    }).toList();
+
+    boolean r = list.stream().allMatch(Boolean::booleanValue);
+    System.out.println(r);
   }
 }

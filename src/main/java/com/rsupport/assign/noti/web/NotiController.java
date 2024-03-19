@@ -90,7 +90,9 @@ public class NotiController {
 
   @DeleteMapping("/{id}")
   public Mono<ApiResponse> delete(Authentication auth, @PathVariable("id") Long id) {
-    return service.delete(id, auth.getName());
+    Mono<ApiResponse> r = service.delete(id, auth.getName()).cache();
+    r.subscribe(System.out::println);
+    return r;
   }
 
 }

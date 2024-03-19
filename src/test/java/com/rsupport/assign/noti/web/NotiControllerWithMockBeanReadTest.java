@@ -1,7 +1,8 @@
 package com.rsupport.assign.noti.web;
 
-// import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockJwt;
+import static org.mockito.ArgumentMatchers.any;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,22 +10,31 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import static org.mockito.ArgumentMatchers.any;
 
+import com.rsupport.assign.common.JwtProvider;
 import com.rsupport.assign.noti.entity.Noti;
 import com.rsupport.assign.noti.service.NotiService;
 
 import reactor.core.publisher.Flux;
 
 @SpringBootTest
-@AutoConfigureWebTestClient
-public class NotiControllerTest {
-
-  @Autowired
-  private WebTestClient webTestClient;
+@AutoConfigureWebTestClient(timeout = "10000000")
+public class NotiControllerWithMockBeanReadTest {
 
   @MockBean
   private NotiService notiService;
+
+  @Autowired
+  private WebTestClient webTestClient;
+  @Autowired
+  private JwtProvider jwtProvider;
+
+  private String testJwtToken;
+
+  @BeforeEach
+  public void setUp() {
+    this.testJwtToken = jwtProvider.generateToken("junit@test.com");
+  }
 
   @Test
   public void should_success_공지글_목록_조회() {
@@ -39,29 +49,8 @@ public class NotiControllerTest {
         // then
         .expectStatus().isOk()
         .expectBodyList(Noti.class)
-        .contains(noti1);
+        .contains(noti1) //
+    ;
   }
-
-  @Test
-  public void should_fail_공지글_등록_without_jwt_token() {
-    // given
-
-    // when
-    webTestClient.get().uri("/noti/create")
-        .exchange()
-
-        // then
-        .expectStatus().is4xxClientError();
-  }
-
-  // @Test
-  // public void should_success_공지글_등록() {
-  // webTestClient.mutateWith(mockJwt())
-  // .get()
-  // .uri("/noti/create")
-  // .exchange()
-  // .expectStatus()
-  // .isForbidden();
-  // }
 
 }

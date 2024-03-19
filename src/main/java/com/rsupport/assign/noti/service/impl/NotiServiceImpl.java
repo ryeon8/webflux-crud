@@ -92,14 +92,14 @@ public class NotiServiceImpl implements NotiService {
                 NotiFile notiFile = NotiFile.builder().notiId(noti.getId()).fileId(fileId).build();
                 return notiFileRepo.save(notiFile);
               })
-              .map(success -> Tuples.of(noti.getId(), true))
+              .flatMap(success -> Mono.just(Tuples.of(noti.getId(), true)))
               .onErrorResume(error -> {
                 log.error("파일 저장 실패", error);
                 return Mono.just(Tuples.of(noti.getId(), false));
               }); // TODO 이 시점의 id는 뭘까?
         })
         .reduce(Tuples.of(0L, true), (r1, r2) -> Tuples.of(r2.getT1(), r1.getT2() && r2.getT2()))
-        .map(r -> ApiResponse.builder().success(r.getT2()).id(r.getT1()).build());
+        .flatMap(r -> Mono.just(ApiResponse.builder().success(r.getT2()).id(r.getT1()).build()));
   }
 
   @Override
@@ -126,23 +126,19 @@ public class NotiServiceImpl implements NotiService {
                 return Mono.just(false);
               });
         })
-        .reduce(true, (r1, r2) -> r1 && r2)
-        .map(result -> ApiResponse.builder().success(result).build());
-
-    // return notiRepo.findById(id)
-    // .filter(saved -> validator.isAuthor(saved, auth))
-    // .flatMap(saved -> notiRepo.save(input.toEntity(id)))
-    // .thenReturn(ApiResponse.builder().success(true).build())
-    // .switchIfEmpty(Mono.just(ApiResponse.builder().success(false).message("대상
-    // 없음").build()));
+        .collectList()
+        .map(results -> results.stream().allMatch(Boolean::booleanValue) && results.size() > 0)
+        .map(result -> ApiResponse.builder().success(result).message(result ? null : "수정 권한 없거나 공지글이 존재하지 않음").build()) //
+    ;
   }
 
   @Override
   public Mono<ApiResponse> delete(Long id, String auth) {
     return notiRepo.findById(id)
         .filter(saved -> validator.isAuthor(saved, auth))
-        .flatMap(saved -> notiRepo.delete(saved)) // cascade delete이므로 noti_file도 함께 삭제됨.
-        .thenReturn(ApiResponse.builder().success(true).build())
+        .flatMap(saved -> notiRepo.delete(saved) // cascade delete이므로 noti_file도 함께 삭제됨.
+            .then(Mono.just(ApiResponse.builder().success(true).build())) //
+        )
         .switchIfEmpty(Mono.just(ApiResponse.builder().success(false).message("이미 삭제된 글이거나 권한 없음").build()));
   }
 

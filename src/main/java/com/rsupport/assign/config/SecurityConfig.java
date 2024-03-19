@@ -51,7 +51,7 @@ public class SecurityConfig {
   private JwtProvider jwtProvider;
 
   private static String[] CAN_ACCESS_ANYBODY = {
-      "/api/token", "/noti/list", "/noti/detail/**", "/file/download/**"
+      "/api/token", "/noti/list", "/noti/detail/**", "/file/download/**", "/noti/test"
   };
 
   @Bean
