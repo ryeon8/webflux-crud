@@ -40,13 +40,13 @@ public class FileInfoServiceImpl implements FileInfoService {
   @Override
   public Mono<Resource> readSavedFile(String fileId) {
     return repo.findByFileId(fileId)
-        .map(saved -> {
+        .flatMap(saved -> {
           Path filePath = Paths.get(fileUploadDir, saved.getFileId());
           try {
-            return new InputStreamResource(Files.newInputStream(filePath));
+            return Mono.just(new InputStreamResource(Files.newInputStream(filePath)));
           } catch (IOException e) {
             log.error("파일 조회 실패", e);
-            return null;
+            return Mono.empty();
           }
         });
   }
@@ -70,14 +70,6 @@ public class FileInfoServiceImpl implements FileInfoService {
         });
   }
 
-  private Mono<Void> serializeFile(FilePart filePart, String filename) {
-    return filePart.transferTo(Paths.get(fileUploadDir, filename));
-  }
-
-  private Mono<FileInfo> persistFile(FileInfo yetSaved) {
-    return repo.save(yetSaved);
-  }
-
   @Override
   public Flux<FileInfo> uploadMultiple(String email, Flux<FilePart> filePartFlux) {
     return filePartFlux
@@ -90,6 +82,25 @@ public class FileInfoServiceImpl implements FileInfoService {
               .and(persistFile(fileInfo))
               .thenReturn(fileInfo);
         });
+  }
+
+  /**
+   * 첨부파일을 저장 경로에 저장 처리.
+   * 
+   * @param filePart 첨부파일
+   * @param filename 파일명
+   */
+  private Mono<Void> serializeFile(FilePart filePart, String filename) {
+    return filePart.transferTo(Paths.get(fileUploadDir, filename));
+  }
+
+  /**
+   * 첨부파일 메타 정보 영속화 처리.
+   * 
+   * @param yetSaved 첨부파일 정보
+   */
+  private Mono<FileInfo> persistFile(FileInfo yetSaved) {
+    return repo.save(yetSaved);
   }
 
 }

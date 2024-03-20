@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import com.rsupport.assign.common.ApiResponse;
@@ -24,6 +25,8 @@ import reactor.core.publisher.Mono;
 @Nested
 @SpringBootTest
 @AutoConfigureWebTestClient(timeout = "10000000")
+@TestPropertySource(properties = { "management.endpoint.info.enabled=false",
+    "management.endpoint.health.enabled=false" })
 public class NotiControllerWithMockBeanDeleteTest {
 
   @MockBean

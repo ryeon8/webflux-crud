@@ -14,6 +14,21 @@ import reactor.util.function.Tuples;
 public class WebFluxTest {
 
   @Test
+  public void test5() {
+    Flux<String> flux = Flux.just("a", "b", "c")
+        .flatMap(e -> {
+          return Flux.just(e);
+        });
+
+    Flux<String> flux2 = Flux.just("1", "2", "3")
+        .map(e -> {
+          return e;
+        });
+    flux2.subscribe(System.out::println);
+    flux.subscribe(System.out::println);
+  }
+
+  @Test
   public void test3() {
     Map<String, String> a = new HashMap<>();
     a.put("aa", "bb");

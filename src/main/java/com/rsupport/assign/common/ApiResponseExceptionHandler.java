@@ -7,6 +7,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 오류 메세지 공통 처리 handler.
+ * 
+ * @author r3n
+ */
 @RestControllerAdvice
 @Slf4j
 public class ApiResponseExceptionHandler {

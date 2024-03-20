@@ -3,6 +3,8 @@ package com.rsupport.assign.noti.service.impl;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
@@ -28,8 +30,9 @@ import reactor.util.function.Tuples;
 @Slf4j
 public class NotiServiceImpl implements NotiService {
 
-  private FileInfoService fileInfoService;
+  /** 첨부파일 관리 서버를 별도로 둔다고 가정, 해당 서비스를 호출하기 위해 선언했으나 로컬 환경 오류로 인해 미사용. */
   private WebClient webClient;
+  private FileInfoService fileInfoService;
   private NotiValidator validator;
   private NotiRepository notiRepo;
   private NotiFileRepository notiFileRepo;
@@ -64,7 +67,7 @@ public class NotiServiceImpl implements NotiService {
   public Flux<String> saveFiles(NotiDto input) {
     List<FilePart> files = input.getFiles() == null ? Collections.emptyList() : input.getFiles();
     return fileInfoService.uploadMultiple(input.getUserEmail(), Flux.fromStream(files.stream()))
-        .map(fileInfo -> fileInfo.getFileId());
+        .flatMap(fileInfo -> Flux.just(fileInfo.getFileId()));
 
     // TODO Unable to load
     // io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider
@@ -96,7 +99,7 @@ public class NotiServiceImpl implements NotiService {
               .onErrorResume(error -> {
                 log.error("파일 저장 실패", error);
                 return Mono.just(Tuples.of(noti.getId(), false));
-              }); // TODO 이 시점의 id는 뭘까?
+              });
         })
         .reduce(Tuples.of(0L, true), (r1, r2) -> Tuples.of(r2.getT1(), r1.getT2() && r2.getT2()))
         .flatMap(r -> Mono.just(ApiResponse.builder().success(r.getT2()).id(r.getT1()).build()));

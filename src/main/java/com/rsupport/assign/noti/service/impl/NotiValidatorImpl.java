@@ -17,8 +17,11 @@ import com.rsupport.assign.noti.service.NotiValidator;
 @Service
 public class NotiValidatorImpl implements NotiValidator {
 
+  /** 첨부 가능 최대 파일 건수 */
   private long fileUploadableCntLimit;
+  /** 단일 파일당 첨부 가능 최대 사이즈(MB) */
   private long singleFileSizeLimitMB;
+  /** 단일 파일당 첨부 가능 최대 사이즈(byte) */
   private long singleFileSizeLimitByte;
 
   public NotiValidatorImpl(

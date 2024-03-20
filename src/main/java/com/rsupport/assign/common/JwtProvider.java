@@ -5,11 +5,8 @@ import java.util.Date;
 
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -18,11 +15,17 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.Getter;
 
+/**
+ * jwt token 관리 service.
+ * 
+ * @author r3n
+ */
 @Component
 public class JwtProvider {
 
   private static final long EXPIRE_DURATION = 24 * 60 * 60 * 1000; // 24 hour
 
+  /** jwt token 암복호화 시크릿키. */
   private String secretKey;
   private Key key;
 
@@ -32,6 +35,11 @@ public class JwtProvider {
     this.key = new SecretKeySpec(this.secretKey.getBytes(), SignatureAlgorithm.HS512.getJcaName());
   }
 
+  /**
+   * jwt claims key 타입.
+   * 
+   * @author r3n
+   */
   @Getter
   public static enum ClaimKey {
     EMAIL("email"),
@@ -44,6 +52,12 @@ public class JwtProvider {
     }
   }
 
+  /**
+   * jwt token 생성.
+   * 
+   * @param email 사용자 이메일
+   * @return jwt token
+   */
   public String generateToken(String email) {
     long now = System.currentTimeMillis();
 
@@ -53,25 +67,20 @@ public class JwtProvider {
         .setIssuedAt(new Date(now))
         .setExpiration(new Date(now + EXPIRE_DURATION))
         .claim(ClaimKey.EMAIL.getKey(), email)
-        .claim(ClaimKey.ROLE.getKey(), "admin") // TODO 이 부분은 email이 아닌 User 객체를 받아 꺼내 쓰는 형태로 구현해야 함.
+        // TODO 이 부분은 email이 아닌 User 객체를 받아 꺼내 쓰는 형태로 구현해야 함.
+        // 현재는 사용자 정보 관리부가 없으므로 상수값 할당.
+        .claim(ClaimKey.ROLE.getKey(), "admin")
         .signWith(key)
         .compact();
   }
 
-  public String getToken(ServerHttpRequest request) {
-    return request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-  }
-
-  public String resolveToken(ServerHttpRequest request) {
-    String bearerToken = getToken(request);
-
-    if (!StringUtils.isBlank(bearerToken) && bearerToken.startsWith("Bearer")) {
-      return bearerToken.substring(7);
-    }
-
-    return null;
-  }
-
+  /**
+   * jwt token 복호화.
+   * 
+   * @param token jwt token
+   * @return claims
+   * @throws JwtException
+   */
   public Claims parseClaims(String token) throws JwtException {
     return Jwts.parserBuilder()
         .setSigningKey(key).build()

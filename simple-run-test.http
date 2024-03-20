@@ -1,73 +1,13 @@
 @server=http://localhost:8080
-@token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyeWVvbkB0ZXN0LmNvbSIsImlzcyI6InJzdXBwb3J0LWFzc2lnbi1ub3RpLXNlcnZlciIsImlhdCI6MTcxMDcyNzU1MywiZXhwIjoxNzEwODEzOTUzLCJlbWFpbCI6InJ5ZW9uQHRlc3QuY29tIiwiYWRtaW4iOiJhZG1pbiJ9.mPbtStEnf9xpFeQOgNoBIGXyAXyAjZ7WFGJoWYvnpvE
+@token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyeWVvbkB0ZXN0LmNvbSIsImlzcyI6InJzdXBwb3J0LWFzc2lnbi1ub3RpLXNlcnZlciIsImlhdCI6MTcxMDkzMjk2NiwiZXhwIjoxNzExMzY0OTY2LCJlbWFpbCI6InJ5ZW9uQHRlc3QuY29tIiwiYWRtaW4iOiJhZG1pbiJ9.D2ThgzJn_BltyTgRGTI19s3owD0lgqBleT9aEuVkJho
 
-### token 발행 
+### (인증 서버) token 발행 - 현재 2024.03.20 20:11부터 5일간 유효한 토큰이 발행되어 있음.
 GET {{server}}/api/token?email=ryeon@test.com
 
-### 첨부파일 조회
-GET {{server}}/file/download/76955aa9-45e0-46db-bcb9-7dbde15e231d
-
-### 단일 첨부파일 업로드
-POST {{server}}/file/upload/single
-Authorization: Bearer {{token}}
-Content-Type: multipart/form-data; boundary=BOUNDARY
-
---BOUNDARY
-Content-Disposition: form-data; name="file"; filename="uploadSample.txt"
-Content-Type: text/plain
-
-{ "name": "jane" }
---BOUNDARY--
-
-
-
-### 다중 첨부파일 업로드
-POST {{server}}/file/upload/multiple2
-Authorization: Bearer {{token}}
-Content-Type: multipart/form-data; boundary=BOUNDARY
-
---BOUNDARY
-Content-Disposition: form-data; name="files"; filename="uploadSample.txt"
-Content-Type: text/plain
-
-{ "name": "jane" }
-
---BOUNDARY
-Content-Disposition: form-data; name="files"; filename="uploadSample2.txt"
-Content-Type: text/plain
-
-{ "name": "jane doe" }
-
---BOUNDARY--
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### test
-GET {{server}}/noti/test
-Authorization: Bearer {{token}}
-
-### paging list
+### (공지글 API) paging list
 GET {{server}}/noti/list?page=1&size=1
 
-### 등록
+### (공지글 API) 등록
 POST {{server}}/noti/create
 Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=BOUNDARY
@@ -80,6 +20,10 @@ input test
 Content-Disposition: form-data; name="openDateTime"
 
 2023-01-01T00:00:00
+--BOUNDARY
+Content-Disposition: form-data; name="closeDateTime"
+
+2023-02-01T00:00:00
 --BOUNDARY
 Content-Disposition: form-data; name="content"
 
@@ -94,15 +38,11 @@ Content-Disposition: form-data; name="files"; filename="uploadSample1.txt"
 { "name": "jane doe" }
 --BOUNDARY--
 
+### (공지글 API) 단건 조회 - 조회 시 등록 API 호출로 발급 받은 ID로 변경 필수
+GET {{server}}/noti/detail/1
 
-
-
- 
-### 단건 조회
-GET {{server}}/noti/detail/10
-
-### 수정
-PUT {{server}}/noti/10
+### (공지글 API) 수정 - 수정 시 등록 API 호출로 발급 받은 ID로 변경 필수
+PUT {{server}}/noti/1
 Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=BOUNDARY
 
@@ -132,7 +72,41 @@ Content-Disposition: form-data; name="files"; filename="uploadSample3.txt"
 { "name": "jane doe" }
 --BOUNDARY--
 
-
-### 삭제
+### (공지글 API) 삭제 - 삭제 시 등록 API 호출로 발급 받은 ID로 변경 필수
 DELETE {{server}}/noti/1
 Authorization: Bearer {{token}}
+
+
+### (파일 서버 API) 첨부파일 조회 - 테이블 noti_file#file_id 지정.
+GET {{server}}/file/download/e1c10760-caf3-4c10-b6ad-96ef0b6ea8e7
+
+### (파일 서버 API) 단일 첨부파일 업로드
+POST {{server}}/file/upload/single
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=BOUNDARY
+
+--BOUNDARY
+Content-Disposition: form-data; name="file"; filename="uploadSample.txt"
+Content-Type: text/plain
+
+{ "name": "jane" }
+--BOUNDARY--
+
+### (파일 서버 API) 다중 첨부파일 업로드
+POST {{server}}/file/upload/multiple2
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=BOUNDARY
+
+--BOUNDARY
+Content-Disposition: form-data; name="files"; filename="uploadSample.txt"
+Content-Type: text/plain
+
+{ "name": "jane" }
+
+--BOUNDARY
+Content-Disposition: form-data; name="files"; filename="uploadSample2.txt"
+Content-Type: text/plain
+
+{ "name": "jane doe" }
+
+--BOUNDARY--

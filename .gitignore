@@ -38,4 +38,6 @@ out/
 gradle
 gradlew
 gradlew.bat
-docker/data
+docker/postgre/data
+docker/redis/data
+locust

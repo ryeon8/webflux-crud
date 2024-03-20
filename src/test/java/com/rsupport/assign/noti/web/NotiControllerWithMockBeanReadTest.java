@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import com.rsupport.assign.common.JwtProvider;
@@ -19,6 +20,8 @@ import reactor.core.publisher.Flux;
 
 @SpringBootTest
 @AutoConfigureWebTestClient(timeout = "10000000")
+@TestPropertySource(properties = { "management.endpoint.info.enabled=false",
+    "management.endpoint.health.enabled=false" })
 public class NotiControllerWithMockBeanReadTest {
 
   @MockBean
